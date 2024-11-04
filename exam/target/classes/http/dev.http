@@ -1,0 +1,124 @@
+### Populate the database with sample trips and guides
+POST http://localhost:7070/api/trips/populate
+Content-Type: application/json
+
+### Create a new trip
+POST http://localhost:7070/api/trips
+Content-Type: application/json
+
+{
+  "name": "Beach Getaway",
+  "starttime": "2024-06-01",
+  "endtime": "2024-06-10",
+  "startposition": "Miami Beach",
+  "price": 1200.00,
+  "category": "BEACH"
+}
+
+### Retrieve all trips
+GET http://localhost:7070/api/trips
+Accept: application/json
+
+### Update a trip
+PUT http://localhost:7070/api/trips/1
+Content-Type: application/json
+
+{
+  "name": "Updated Beach Getaway",
+  "starttime": "2024-06-01",
+  "endtime": "2024-06-12",
+  "startposition": "Miami Beach",
+  "price": 1300.00,
+  "category": "BEACH"
+}
+
+### Delete a trip by ID
+DELETE http://localhost:7070/api/trips/1
+Accept: application/json
+
+### Add a guide to a trip
+PUT http://localhost:7070/api/trips/6/guides/1
+Accept: application/json
+
+### Retrieve a trip by ID
+GET http://localhost:7070/api/trips/6
+Accept: application/json
+
+### Retrieve trips by guide
+GET http://localhost:7070/api/trips/guides/1
+Accept: application/json
+
+### Filter trips by category
+GET http://localhost:7070/api/trips/categories/BEACH
+Accept: application/json
+
+### Retrieve total price by guide
+GET http://localhost:7070/api/trips/guides/totalprice
+Accept: application/json
+
+###  Retrieves packing items based on the specified trip category
+GET http://localhost:7070/api/trips/packingitems/beach
+Accept: application/json
+
+### Retrieves the total weight of all packing items for the specified trip ID.
+GET http://localhost:7070/api/trips/2/packing/weight
+Accept: application/json
+
+### Retrieves a trip by ID, including its associated packing items
+GET http://localhost:7070/api/trips/2/packing
+Accept: application/json
+
+### Create a new user - this one will only get a USER role by default
+POST http://localhost:7070/api/auth/register
+
+{
+    "username": "user",
+    "password": "test123"
+}
+
+### Login USER role
+POST http://localhost:7070/api/auth/login
+
+{
+    "username": "user",
+    "password": "test123"
+}
+
+> {%
+    client.global.set("jwt_token", response.body.token);
+    console.log("JWT Token:", client.global.get("jwt_token"));
+%}
+
+### Create a new user - ADMIN role
+POST http://localhost:7070/api/auth/register
+
+{
+    "username": "admin",
+    "password": "test123"
+}
+
+
+### Login ADMIN role
+POST http://localhost:7070/api/auth/login
+
+{
+    "username": "admin",
+    "password": "test123"
+}
+
+> {%
+    client.global.set("jwt_token", response.body.token);
+    console.log("JWT Token:", client.global.get("jwt_token"));
+%}
+
+### Add admin role to user
+POST http://localhost:7070/api/auth/register
+auth/user/addrole/
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+    "role": "ADMIN"
+}
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
