@@ -8,9 +8,9 @@ import dat.config.Populator;
 import dat.controllers.ITripController;
 import dat.daos.impl.TripDAO;
 import dat.dtos.PackedItemDTO;
-import dat.dtos.GuideTotalPriceDTO;
 import dat.dtos.PackedItemResponseDTO;
 import dat.dtos.TripDTO;
+import dat.entities.Guide;
 import dat.enums.TripCategory;
 import dat.exceptions.Message;
 import io.javalin.http.BadRequestResponse;
@@ -24,8 +24,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TripController implements ITripController {
 
@@ -187,12 +187,26 @@ public class TripController implements ITripController {
     @Override
     public void getTotalPriceByGuide(Context ctx) {
         try {
-            List<GuideTotalPriceDTO> guideTotalPriceList = tripDAO.getTotalPriceByGuide(); // Retrieve total prices
-            ctx.status(200).json(guideTotalPriceList); // Return the list as JSON
+            Map<Guide, Double> guideTotalPriceMap = tripDAO.getTotalPriceByGuide();
+
+            // Convert the map to a JSON-friendly format
+            List<Map<String, Object>> guideTotalPriceList = guideTotalPriceMap.entrySet().stream()
+                    .map(entry -> {
+                        Map<String, Object> map = new LinkedHashMap<>(); // Use LinkedHashMap
+                        // Put guideId first
+                        map.put("guideId", entry.getKey().getId());
+                        map.put("totalPrice", entry.getValue());
+                        return map;
+                    })
+                    .collect(Collectors.toList());
+
+            // Send the response with status 200 and JSON body
+            ctx.status(200).json(guideTotalPriceList);
         } catch (Exception e) {
             ctx.status(500).json("Error occurred while retrieving total prices by guide: " + e.getMessage());
         }
     }
+
 
     public void getPackingItemsByCategory(Context ctx) {
         String category = ctx.pathParam("category"); // Get category from URL
@@ -266,7 +280,8 @@ public class TripController implements ITripController {
                 int totalWeight = packedItems.getItems().stream()
                         .mapToInt(PackedItemDTO::getWeightInGrams)
                         .sum(); // Calculate the total weight
-                ctx.status(200).json(totalWeight);
+                Map<String, Integer> response = Map.of("totalWeight", totalWeight);
+                ctx.status(200).json(response);
             } catch (Exception e) {
                 ctx.status(500).json("Error fetching packing items: " + e.getMessage());
             }

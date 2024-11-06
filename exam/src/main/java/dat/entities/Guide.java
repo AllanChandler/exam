@@ -43,11 +43,15 @@ public class Guide {
         }
     }
 
-    // New method to calculate total price of trips
+
     public double calculateTotalPrice() {
+        // Check if there are trips before calculating total price
+        if (trips.isEmpty()) {
+            return 0.0; // Return 0 if no trips exist
+        }
         return trips.stream()
-                .mapToDouble(Trip::getPrice) // Map each Trip to its price
-                .sum(); // Sum up all prices
+                .mapToDouble(Trip::getPrice)
+                .sum();
     }
 
     @Override

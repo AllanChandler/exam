@@ -1,5 +1,6 @@
 package dat.dtos;
 
+import dat.entities.Guide;
 import dat.entities.Trip;
 import dat.enums.TripCategory;
 import lombok.AllArgsConstructor;
@@ -42,15 +43,32 @@ public class TripDTO {
         }
     }
 
-    // Method to convert TripDTO back to a Trip entity (guide setup handled elsewhere)
-    public Trip toEntity() {
+    // Constructor that takes all the required parameters
+    public TripDTO(String name, LocalDate starttime, LocalDate endtime, String startposition,
+                   double price, TripCategory category, String guideFirstname, String guideLastname,
+                   List<PackedItemDTO> packedItems) {
+        this.name = name;
+        this.starttime = starttime;
+        this.endtime = endtime;
+        this.startposition = startposition;
+        this.price = price;
+        this.category = category;
+        this.guideFirstname = guideFirstname;
+        this.guideLastname = guideLastname;
+        this.packedItems = packedItems;
+    }
+
+    // Method to convert TripDTO back to Trip entity (guide setup handled here)
+    public Trip toEntity(Guide guide) {
         Trip trip = new Trip();
         trip.setName(this.name);
         trip.setStarttime(this.starttime);
         trip.setEndtime(this.endtime);
         trip.setStartposition(this.startposition);
-        trip.setPrice(this.price); // Using double
+        trip.setPrice(this.price);
         trip.setCategory(this.category);
+        trip.setGuide(guide);
+
         return trip;
     }
 

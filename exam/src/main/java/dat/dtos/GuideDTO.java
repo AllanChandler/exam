@@ -22,7 +22,6 @@ public class GuideDTO {
     private int yearsOfExperience;
     private Set<TripDTO> trips = new HashSet<>();
 
-
     // Constructor to initialize GuideDTO from a Guide entity
     public GuideDTO(Guide guide) {
         if (guide != null) {
@@ -36,9 +35,10 @@ public class GuideDTO {
         }
     }
 
-    // Method to convert GuideDTO back to a Guide entity (trips setup handled elsewhere)
+    // Method to convert GuideDTO back to a Guide entity (trips handled elsewhere)
     public Guide toEntity() {
         Guide guide = new Guide();
+        guide.setId(this.id);
         guide.setFirstname(this.firstname);
         guide.setLastname(this.lastname);
         guide.setEmail(this.email);
@@ -60,4 +60,3 @@ public class GuideDTO {
         return id == other.id;
     }
 }
-

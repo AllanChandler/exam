@@ -2,8 +2,6 @@ package dat.daos.impl;
 
 import dat.daos.IDAO;
 import dat.daos.ITripGuideDAO;
-import dat.dtos.GuideDTO;
-import dat.dtos.GuideTotalPriceDTO;
 import dat.dtos.TripDTO;
 import dat.entities.Trip;
 import dat.entities.Guide; // Import Guide entity
@@ -55,7 +53,7 @@ public class TripDAO implements IDAO<TripDTO>, ITripGuideDAO {
         try (EntityManager em = emf.createEntityManager()) {
             Trip trip = em.find(Trip.class, id);
             if (trip == null) {
-                throw new BadRequestResponse("Trip not found with ID: " + id);
+                return null;
             }
             return new TripDTO(trip); // Assuming TripDTO has a constructor that takes Trip
         } catch (Exception e) {
@@ -138,7 +136,7 @@ public class TripDAO implements IDAO<TripDTO>, ITripGuideDAO {
             transaction.begin();
             Trip trip = em.find(Trip.class, id);
             if (trip == null) {
-                throw new BadRequestResponse("Trip not found with ID: " + id);
+                return false;
             }
 
             em.remove(trip); // Remove the trip
@@ -217,36 +215,41 @@ public class TripDAO implements IDAO<TripDTO>, ITripGuideDAO {
     public List<TripDTO> getTripsByCategory(TripCategory category) {
         try (EntityManager em = emf.createEntityManager()) {
             // Query to fetch trips by category
-            List<Trip> trips = em.createQuery("SELECT t FROM Trip t WHERE t.category = :category", Trip.class)
-                    .setParameter("category", category)
+            List<Trip> trips = em.createQuery("SELECT t FROM Trip t", Trip.class)
                     .getResultList();
 
             // Convert to TripDTO
             return trips.stream()
+                    .filter(trip -> trip.getCategory() == category)
                     .map(TripDTO::new)
                     .collect(Collectors.toList());
         }
     }
 
     @Override
-    public List<GuideTotalPriceDTO> getTotalPriceByGuide() {
+    public Map<Guide, Double> getTotalPriceByGuide() {
         EntityManager em = emf.createEntityManager();
 
         try {
-            // Fetch all guides and calculate total prices
-            return em.createQuery("SELECT g FROM Guide g", Guide.class)
-                    .getResultList()
-                    .stream()
-                    .map(guide -> new GuideTotalPriceDTO(
-                            guide.getId(),
-                            guide.calculateTotalPrice())) // Calculate total price using the entity method
-                    .collect(Collectors.toList());
+            // Fetch all guides from the database
+            List<Guide> guides = em.createQuery("SELECT g FROM Guide g", Guide.class)
+                    .getResultList();
+
+            // Calculate total price for each guide using Streams
+            return guides.stream()
+                    .collect(Collectors.toMap(
+                            guide -> guide, // Key: Guide object
+                            Guide::calculateTotalPrice // Value: Total price calculated by each guide
+                    ));
+
         } catch (Exception e) {
             throw new RuntimeException("Error while retrieving total prices by guide: " + e.getMessage(), e);
         } finally {
-            em.close();
+            em.close(); // Ensure EntityManager is closed to avoid memory leaks
         }
     }
+
+
 
 
 }
